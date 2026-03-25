@@ -1,0 +1,78 @@
+version: 3
+
+#might be useful
+#configs:
+
+services:
+  db:
+    build: requirements/mariadb
+    image: mariadb
+    container_name: mariadb
+    env_file:
+      - .env
+    secrets:
+      - db_password
+    volumes:
+      - db_data:/var/lib/mysql
+#ports:
+#  - ?
+    networks:
+      - inception
+    restart: unless-stopped # / always ?
+  wp:
+    build: requirements/wordpress
+    image: wordpress
+    container_name: wordpress
+    env_file:
+      - .env
+    depends_on:
+      db
+    volumes:
+      - wp_data:/var/www/html
+#ports:
+# - 
+    networks:
+      - inception
+    restart: unless-stopped 
+  nginx:
+    build: requirements/nginx
+    image: nginx
+    container_name: nginx
+    domainname: jwardeng@42.fr
+    configs:
+      - nginx_conf
+    depends_on:
+      wp
+    ports:
+      - "443:443"
+    networks:
+      - inception
+    restart: unless-stopped 
+
+networks:
+  inception:
+    driver: bridge
+  # if not defined creates default network
+
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+
+
+volumes:
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/mariadb
+  wp_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/wordpress
+
+configs:
+  nginx_conf:
+    file: ./configs/nginx.conf
