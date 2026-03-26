@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# do i need to change to /run/secrets/db_password db_root_password?
+
+
+
 # sets -e -> exit on error
 set -e
 
@@ -9,7 +13,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mariadb-install-db --user=mysql --datadir=/var/lib/mysql
 
 # initial server startup + prevent connection while initializing,[& runs in background] [$! = PID of MariaDB server]
-    mysqld --skip-networking &
+    mariadbd --user=mysql --skip-networking &
     pid="$!"
 
 # Wait until server is ready ([until = while !] 0=server ready, non-zero=not ready)
@@ -19,8 +23,8 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
         sleep 1
     done
 
-    MYSQL_PASSWORD=$(cat /run/secrets/mysql_pw)
-    MYSQL_ROOT_PASSWORD=$(cat /run/secrets/mysql_root_pw)
+    MYSQL_PASSWORD=$(cat /run/secrets/db_password)
+    MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 
 #sending SQL commands to mysql client (mysql = mariadb command line client, -u root -> connect as root)
 # --socket=/var/lib/mysql/mysql.sock
@@ -37,4 +41,4 @@ EOF
 fi
 
     chown -R mysql:mysql /var/lib/mysql
-    exec "$@"
+    exec "$@" --user=mysql --datadir=/var/lib/mysql

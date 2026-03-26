@@ -3,8 +3,8 @@ version: "3.8"
 services:
   db:
     build: requirements/mariadb
-    image: mariadb
-    container_name: mariadb
+    image: mariadb_in
+    container_name: mariadb_in
     env_file:
       - .env
     secrets:
@@ -19,10 +19,13 @@ services:
     restart: unless-stopped # / always ?
   wp:
     build: requirements/wordpress
-    image: wordpress
-    container_name: wordpress
+    image: wordpress_in
+    container_name: wordpress_in
     env_file:
       - .env
+    secrets:
+      - db_password
+      - db_root_password
     depends_on:
       - db
     volumes:
@@ -34,8 +37,8 @@ services:
     restart: unless-stopped 
   nginx:
     build: requirements/nginx
-    image: nginx
-    container_name: nginx
+    image: nginx_in
+    container_name: nginx_in
     depends_on:
       - wp
     ports:

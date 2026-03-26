@@ -18,4 +18,4 @@ ENTRYPOINT ["/init.sh"]
 
 #default arguments (can be overwritten by docker run arguments)
 #mysqld: runs database -> starts database engine, loads my.cnf & initializes storage engines
-CMD ["mysqld"]
+CMD ["mariadbd"]
