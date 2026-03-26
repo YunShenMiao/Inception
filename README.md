@@ -12,4 +12,7 @@ WORDPRESS
  - https://wiki.alpinelinux.org/wiki/WordPress
 
 MariaDB
+    - https://www.tutorialspoint.com/mariadb/index.htm
     - https://wiki.alpinelinux.org/wiki/MariaDB
+    - https://mariadb.com/docs/server/mariadb-quickstart-guides/mariadb-sql-cheat-cheat-guide
+    - https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/configuring-mariadb/configuring-mariadb-with-option-files

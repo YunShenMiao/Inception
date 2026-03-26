@@ -6,15 +6,16 @@ COPY conf/my.cnf /etc/mysql/my.cnf
 COPY tools/init.sh /init.sh
 
 # EXECUTE BUILD CMDS TO CREATE NEW LAYER 
-RUN chmod +x /init.sh
-RUN apk add --no-cache mariadb mariadb-client
-RUN mkdir -p /var/lib/mysql
+RUN apk add --no-cache mariadb mariadb-client \
+    && mkdir -p /var/lib/mysql \
+    && chmod +x /init.sh
 
 # CONTAINER LISTENS ON
 EXPOSE 3306
 
-#default commands (can be overwritten by docker run arguments)
-CMD ["mysqld", "--datadir=/var/lib/mysql", "--bind-address=0.0.0.0"]
-
 #default executable
 ENTRYPOINT ["/init.sh"]
+
+#default arguments (can be overwritten by docker run arguments)
+#mysqld: runs database -> starts database engine, loads my.cnf & initializes storage engines
+CMD ["mysqld"]
