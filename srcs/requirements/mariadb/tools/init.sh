@@ -1,11 +1,10 @@
 #!/bin/sh
 
-# do i need to change to /run/secrets/db_password db_root_password?
-
-
+# do i need --socket still? or does it get it from config
 
 # sets -e -> exit on error
-set -e
+set -ex
+unset MYSQL_HOST
 
 # if directory doesnt exist (!system database) init with mariadb-install-db
 if [ ! -d "/var/lib/mysql/mysql" ]; then
@@ -13,7 +12,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mariadb-install-db --user=mysql --datadir=/var/lib/mysql
 
 # initial server startup + prevent connection while initializing,[& runs in background] [$! = PID of MariaDB server]
-    mariadbd --user=mysql --skip-networking &
+    mariadbd --socket=/var/lib/mysql/mysql.sock --user=mysql &
     pid="$!"
 
 # Wait until server is ready ([until = while !] 0=server ready, non-zero=not ready)
@@ -28,7 +27,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 
 #sending SQL commands to mysql client (mysql = mariadb command line client, -u root -> connect as root)
 # --socket=/var/lib/mysql/mysql.sock
-    mysql -u root << EOF
+    mysql --socket=/var/lib/mysql/mysql.sock -u root << EOF
 CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
 GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';

@@ -2,7 +2,7 @@
 FROM alpine:3.22
 
 # COPY SRC DEST
-COPY conf/my.cnf /etc/mysql/my.cnf
+COPY conf/my.cnf /etc/my.cnf
 COPY tools/init.sh /init.sh
 
 # EXECUTE BUILD CMDS TO CREATE NEW LAYER 

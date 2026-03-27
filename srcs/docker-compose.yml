@@ -1,7 +1,5 @@
-version: "3.8"
-
 services:
-  db:
+  mariadb_in:
     build: requirements/mariadb
     image: mariadb_in
     container_name: mariadb_in
@@ -27,7 +25,7 @@ services:
       - db_password
       - db_root_password
     depends_on:
-      - db
+      - mariadb_in
     volumes:
       - wp_data:/var/www/html
 #ports:

@@ -1,7 +1,7 @@
 #BASE
 FROM alpine:3.22
 
-COPY html/ /usr/share/nginx/html/
+#COPY html/ /usr/share/nginx/html/
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 
 RUN apk add --no-cache nginx openssl \
