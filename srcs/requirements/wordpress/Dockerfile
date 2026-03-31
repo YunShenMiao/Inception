@@ -10,7 +10,8 @@ RUN apk add --no-cache php php-fpm php-mysqli php-phar curl tar mariadb-client \
     && rm /tmp/wordpress.tar.gz \
     && curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x /usr/local/bin/wp \
-    && chown -R nobody:nobody /var/www/html
+    && chown -R nobody:nobody /var/www/html \
+    && sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/' /etc/php*/php-fpm.d/www.conf
 
 
 EXPOSE 9000
