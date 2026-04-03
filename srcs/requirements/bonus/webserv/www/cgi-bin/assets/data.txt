@@ -1,0 +1,2 @@
+CGI demo asset:
+- Used by python/echo.py to prove relative filesystem access.

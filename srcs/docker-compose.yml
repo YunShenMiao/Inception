@@ -10,12 +10,10 @@ services:
       - db_root_password
     volumes:
       - db_data:/var/lib/mysql
-#ports:
-#  - ?
     networks:
       - inception
     restart: unless-stopped # / always ?
-  wp:
+  wordpress_in:
     build: requirements/wordpress
     image: wordpress_in
     container_name: wordpress_in
@@ -23,22 +21,22 @@ services:
       - .env
     secrets:
       - db_password
-      - db_root_password
+      - wp_admin_password
+      - wp_user_password
     depends_on:
       - mariadb_in
+      - redis_in
     volumes:
       - wp_data:/var/www/html
-#ports:
-# - 
     networks:
       - inception
     restart: unless-stopped 
-  nginx:
+  nginx_in:
     build: requirements/nginx
     image: nginx_in
     container_name: nginx_in
     depends_on:
-      - wp
+      - wordpress_in
     ports:
       - "443:443"
     networks:
@@ -46,6 +44,23 @@ services:
     volumes:
       - wp_data:/var/www/html
     restart: unless-stopped 
+  redis_in:
+    build: requirements/bonus/redis
+    image: redis_in
+    container_name: redis_in
+    networks:
+      - inception
+    restart: unless-stopped
+  catsurf_in:
+    build: requirements/bonus/webserv
+    image: catsurf_in
+    container_name: catsurf_in
+    networks:
+      - inception
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "9110:9110"
 
 networks:
   inception:
@@ -57,6 +72,10 @@ secrets:
     file: ../secrets/mysql_pw
   db_root_password:
     file: ../secrets/mysql_root_pw
+  wp_admin_password:
+    file: ../secrets/wp_admin_pw
+  wp_user_password:
+    file: ../secrets/wp_user_pw
 
 
 volumes:

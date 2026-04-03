@@ -17,3 +17,11 @@ MariaDB
 
 NGINX
     - https://docs.nginx.com/nginx/admin-guide/web-server/web-server/
+
+Redis
+    - https://redis.io/docs/latest/develop/
+    - https://www.youtube.com/watch?v=a4yX7RUgTxI
+
+Adminer
+    - https://www.adminer.org/
+    - https://www.youtube.com/watch?v=wiIgSVBCY4I

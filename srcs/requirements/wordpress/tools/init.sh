@@ -1,13 +1,13 @@
 #!/bin/sh
-set -e
+set -ex
 
 cd /var/www/html
 
 DB_PASSWORD=$(cat /run/secrets/db_password)
 
-until mariadb-admin ping -h db -u root --password="$(cat /run/secrets/db_root_password)" --silent; do
-   echo "Waiting for MariaDB..."
-   sleep 1
+until mariadb-admin ping -h "${MYSQL_HOST}" -u "${MYSQL_USER}" --password="${DB_PASSWORD}" --silent 2>/dev/null; do
+    echo "Waiting for MariaDB..."
+    sleep 1
 done
 
 if [ ! -f wp-config.php ]; then
@@ -23,6 +23,9 @@ define( 'DB_PASSWORD', '${DB_PASSWORD}' );
 define( 'DB_HOST', '${MYSQL_HOST}' );
 define( 'DB_CHARSET', 'utf8' );
 define( 'DB_COLLATE', '' );
+define( 'WP_REDIS_HOST', 'redis_in' );
+define( 'WP_REDIS_PORT', 6379 );
+define( 'WP_CACHE', true );
 
 EOF
 
@@ -40,8 +43,8 @@ EOF
 fi
 
 if ! wp core is-installed --allow-root; then
-    WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_pw)
-    WP_USER_PASSWORD=$(cat /run/secrets/wp_user_pw)
+    WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password)
+    WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password)
 
     wp core install --allow-root \
         --url="https://${DOMAIN_NAME}" \
@@ -56,5 +59,8 @@ if ! wp core is-installed --allow-root; then
         --role=subscriber \
         --user_pass="${WP_USER_PASSWORD}"
 fi
+
+    wp plugin install redis-cache --activate --allow-root
+    wp redis enable --allow-root
 
 exec "$@"

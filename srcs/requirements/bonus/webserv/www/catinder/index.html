@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catinder 🐱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .card-container {
+            position: relative;
+            width: 320px;
+            height: 420px;
+            perspective: 1000px;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+            cursor: grab;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            user-select: none;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .card .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .card .overlay.like {
+            background: rgba(76, 217, 100, 0.4);
+        }
+
+        .card .overlay.nope {
+            background: rgba(255, 59, 48, 0.4);
+        }
+
+        .card .overlay span {
+            font-size: 4rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            transform: rotate(-15deg);
+        }
+
+        .card.swiping-right .overlay.like,
+        .card.swiping-left .overlay.nope {
+            opacity: 1;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 40px;
+        }
+
+        .btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-nope {
+            background: white;
+            color: #ff3b30;
+        }
+
+        .btn-like {
+            background: white;
+            color: #4cd964;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #764ba2;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #764ba2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes swipeRight {
+            to {
+                transform: translateX(150%) rotate(30deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes swipeLeft {
+            to {
+                transform: translateX(-150%) rotate(-30deg);
+                opacity: 0;
+            }
+        }
+
+        .card.exit-right {
+            animation: swipeRight 0.4s ease forwards;
+        }
+
+        .card.exit-left {
+            animation: swipeLeft 0.4s ease forwards;
+        }
+
+        .stats {
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐱 Catinder</h1>
+        
+        <div class="card-container" id="cardContainer">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                Loading cats...
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-nope" id="btnNope" title="Nope">✕</button>
+            <button class="btn btn-like" id="btnLike" title="Like">♥</button>
+        </div>
+
+        <div class="stats">
+            <span id="likeCount">0</span> ❤️ | <span id="nopeCount">0</span> ✕
+        </div>
+    </div>
+
+    <script>
+        const cardContainer = document.getElementById('cardContainer');
+        const loading = document.getElementById('loading');
+        const btnLike = document.getElementById('btnLike');
+        const btnNope = document.getElementById('btnNope');
+        const likeCountEl = document.getElementById('likeCount');
+        const nopeCountEl = document.getElementById('nopeCount');
+
+        let likeCount = 0;
+        let nopeCount = 0;
+        let currentCard = null;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        async function loadCatImage() {
+            loading.style.display = 'block';
+            
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <img src="" alt="Cat">
+                <div class="overlay like"><span>LIKE</span></div>
+                <div class="overlay nope"><span>NOPE</span></div>
+            `;
+            
+            const img = card.querySelector('img');
+            
+            return new Promise((resolve) => {
+                // Add timestamp to prevent caching
+                img.src = `/getcat?t=${Date.now()}`;
+                
+                img.onload = () => {
+                    loading.style.display = 'none';
+                    cardContainer.appendChild(card);
+                    setupCardEvents(card);
+                    currentCard = card;
+                    resolve(card);
+                };
+                
+                img.onerror = () => {
+                    loading.innerHTML = '<div class="spinner"></div>Retrying...';
+                    setTimeout(() => {
+                        img.src = `/getcat?t=${Date.now()}`;
+                    }, 1000);
+                };
+            });
+        }
+
+        function setupCardEvents(card) {
+            // Mouse events
+            card.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+
+            // Touch events
+            card.addEventListener('touchstart', startDrag, { passive: true });
+            document.addEventListener('touchmove', drag, { passive: true });
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function startDrag(e) {
+            if (!currentCard) return;
+            isDragging = true;
+            startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            currentCard.style.transition = 'none';
+        }
+
+        function drag(e) {
+            if (!isDragging || !currentCard) return;
+            
+            currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const diffX = currentX - startX;
+            const rotation = diffX * 0.1;
+            
+            currentCard.style.transform = `translateX(${diffX}px) rotate(${rotation}deg)`;
+            
+            // Show overlay based on direction
+            currentCard.classList.remove('swiping-left', 'swiping-right');
+            if (diffX > 50) {
+                currentCard.classList.add('swiping-right');
+            } else if (diffX < -50) {
+                currentCard.classList.add('swiping-left');
+            }
+        }
+
+        function endDrag() {
+            if (!isDragging || !currentCard) return;
+            isDragging = false;
+            
+            const diffX = currentX - startX;
+            currentCard.style.transition = 'transform 0.3s ease';
+            
+            if (diffX > 100) {
+                swipe('right');
+            } else if (diffX < -100) {
+                swipe('left');
+            } else {
+                // Reset position
+                currentCard.style.transform = '';
+                currentCard.classList.remove('swiping-left', 'swiping-right');
+            }
+            
+            startX = 0;
+            currentX = 0;
+        }
+
+        function swipe(direction) {
+            if (!currentCard) return;
+            
+            const card = currentCard;
+            currentCard = null;
+            
+            card.classList.add(direction === 'right' ? 'exit-right' : 'exit-left');
+            
+            if (direction === 'right') {
+                likeCount++;
+                likeCountEl.textContent = likeCount;
+            } else {
+                nopeCount++;
+                nopeCountEl.textContent = nopeCount;
+            }
+            
+            setTimeout(() => {
+                card.remove();
+                loadCatImage();
+            }, 400);
+        }
+
+        // Button events
+        btnLike.addEventListener('click', () => {
+            if (currentCard) {
+                currentCard.classList.add('swiping-right');
+                setTimeout(() => swipe('right'), 100);
+            }
+        });
+
+        btnNope.addEventListener('click', () => {
+            if (currentCard) {
+                currentCard.classList.add('swiping-left');
+                setTimeout(() => swipe('left'), 100);
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                btnLike.click();
+            } else if (e.key === 'ArrowLeft') {
+                btnNope.click();
+            }
+        });
+
+        // Initialize
+        loadCatImage();
+    </script>
+</body>
+</html>

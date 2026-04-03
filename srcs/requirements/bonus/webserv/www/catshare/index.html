@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f5a67b" />
+  <title>CatCloud - Purrfect File Storage</title>
+  <meta name="description" content="The cutest way to store your files in the cloud. Drag, drop, and let our cats handle the rest!" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #faf4ee;
+      --fg: #3d2e22;
+      --card: #fdf8f3;
+      --card-fg: #3d2e22;
+      --primary: #e8805a;
+      --primary-light: rgba(232, 128, 90, 0.1);
+      --primary-lighter: rgba(232, 128, 90, 0.05);
+      --muted: #a08878;
+      --muted-light: rgba(160, 136, 120, 0.4);
+      --border: #ecddd0;
+      --destructive: #d45a3a;
+      --destructive-light: rgba(212, 90, 58, 0.12);
+      --destructive-hover: rgba(212, 90, 58, 0.22);
+      --cat-body: #fcd5b8;
+      --cat-stroke: #f0c4a0;
+      --cat-accent: #f5a67b;
+      --cat-dark: #4a3728;
+      --cat-chest: #fff5eb;
+      --shadow-sm: 0 1px 3px rgba(61,46,34,0.06);
+      --shadow-md: 0 4px 12px rgba(61,46,34,0.08);
+      --shadow-lg: 0 8px 24px rgba(232,128,90,0.1);
+      --radius: 16px;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── Floating Clouds Background ── */
+    .clouds {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .cloud {
+      position: absolute;
+      opacity: 0.06;
+    }
+
+    .cloud-1 {
+      top: 5%;
+      left: 5%;
+      width: 220px;
+      animation: floatCloud 28s ease-in-out infinite;
+      color: var(--primary);
+    }
+
+    .cloud-2 {
+      top: 22%;
+      right: 6%;
+      width: 170px;
+      animation: floatCloud 34s ease-in-out infinite reverse;
+      color: var(--cat-accent);
+    }
+
+    .cloud-3 {
+      bottom: 10%;
+      left: 12%;
+      width: 260px;
+      animation: floatCloud 40s ease-in-out infinite;
+      color: var(--primary);
+      opacity: 0.04;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 36px 16px 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      box-shadow: var(--shadow-md);
+      object-fit: cover;
+    }
+
+    .header-text h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: var(--fg);
+      line-height: 1.1;
+    }
+
+    .header-text p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* ── Upload Section ── */
+    .upload-section {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .dropzone {
+      position: relative;
+      cursor: pointer;
+      border-radius: 24px;
+      border: 2.5px dashed var(--border);
+      padding: 32px 24px;
+      text-align: center;
+      background: var(--card);
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .dropzone:hover {
+      border-color: rgba(232, 128, 90, 0.4);
+      background: rgba(253, 248, 243, 0.8);
+      box-shadow: var(--shadow-md);
+    }
+
+    .dropzone:focus-visible {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(232, 128, 90, 0.2);
+    }
+
+    .dropzone.dragover {
+      border-color: var(--primary);
+      background: var(--primary-lighter);
+      transform: scale(1.02);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .dropzone-text {
+      margin-top: 8px;
+    }
+
+    .dropzone-text .main-text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--fg);
+    }
+
+    .dropzone-text .sub-text {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .dropzone-text .drag-text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    .cloud-upload-icon {
+      margin: 16px auto 0;
+      width: 48px;
+      height: 32px;
+      color: var(--muted-light);
+    }
+
+    .file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+    }
+
+    /* ── Cat SVG ── */
+    .cat-wrapper {
+      transition: transform 0.2s ease;
+    }
+
+    .cat-wrapper.bouncing {
+      animation: catBounce 0.4s ease-in-out 3;
+    }
+
+    .cat-wrapper.reaching {
+      animation: catReach 0.5s ease-out forwards;
+    }
+
+    .cat-svg {
+      width: 160px;
+      height: 144px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .tail-idle {
+      animation: tailIdle 3s ease-in-out infinite;
+      transform-origin: 160px 120px;
+    }
+
+    .tail-wag {
+      animation: tailWag 0.3s ease-in-out infinite;
+      transform-origin: 160px 120px;
+    }
+
+    /* ── File List ── */
+    .file-section {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 16px 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .file-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .file-section-header h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--fg);
+    }
+
+    .file-count {
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      animation: fileSlideIn 0.4s ease-out forwards;
+      opacity: 0;
+    }
+
+    .file-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .file-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .file-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--card-fg);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-size {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .file-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    /* ── Cat Download Button ── */
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      background: rgba(110, 170, 130, 0.12);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      outline: none;
+    }
+
+    .download-btn:hover {
+      background: rgba(110, 170, 130, 0.24);
+      transform: scale(1.15);
+    }
+
+    .download-btn:focus-visible {
+      box-shadow: 0 0 0 3px rgba(110, 170, 130, 0.3);
+    }
+
+    .download-btn:active {
+      transform: scale(0.95);
+    }
+
+    .download-icon {
+      width: 24px;
+      height: 24px;
+      color: #5a9a6a;
+      transition: transform 0.25s ease;
+    }
+
+    .download-btn:hover .download-icon {
+      transform: translateY(2px);
+    }
+
+    /* ── Cat Paw Delete Button ── */
+    .paw-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      background: var(--destructive-light);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      outline: none;
+    }
+
+    .paw-btn:hover {
+      background: var(--destructive-hover);
+      transform: scale(1.15);
+    }
+
+    .paw-btn:focus-visible {
+      box-shadow: 0 0 0 3px rgba(212, 90, 58, 0.25);
+    }
+
+    .paw-btn:active {
+      transform: scale(0.95);
+    }
+
+    .paw-icon {
+      width: 22px;
+      height: 22px;
+      color: var(--destructive);
+      transition: transform 0.2s ease;
+    }
+
+    .paw-btn:hover .paw-icon {
+      transform: rotate(-12deg);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding-bottom: 32px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Animations ── */
+    @keyframes catBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-14px); }
+    }
+
+    @keyframes catReach {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(8px) scaleY(0.95); }
+    }
+
+    @keyframes tailWag {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(18deg); }
+      75% { transform: rotate(-18deg); }
+    }
+
+    @keyframes tailIdle {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(6deg); }
+    }
+
+    @keyframes fileSlideIn {
+      0% { opacity: 0; transform: translateY(14px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes floatCloud {
+      0%, 100% { transform: translateX(0) translateY(0); }
+      25% { transform: translateX(25px) translateY(-10px); }
+      50% { transform: translateX(-12px) translateY(6px); }
+      75% { transform: translateX(18px) translateY(-4px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    @keyframes pawSwipe {
+      0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+      50% { transform: translateX(-20px) rotate(-25deg); opacity: 0.7; }
+      100% { transform: translateX(0) rotate(0deg); opacity: 0; }
+    }
+
+    .file-card.removing {
+      animation: pawSwipe 0.4s ease-out forwards;
+    }
+
+    /* ── Responsive ── */
+    @media (min-width: 640px) {
+      .header-text h1 { font-size: 2.6rem; }
+      .dropzone { padding: 40px 32px; }
+      .cat-svg { width: 180px; height: 162px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Clouds -->
+  <div class="clouds" aria-hidden="true">
+    <svg class="cloud cloud-1" viewBox="0 0 200 100">
+      <ellipse cx="100" cy="60" rx="80" ry="30" fill="currentColor" />
+      <ellipse cx="60" cy="50" rx="50" ry="25" fill="currentColor" />
+      <ellipse cx="140" cy="45" rx="55" ry="28" fill="currentColor" />
+    </svg>
+    <svg class="cloud cloud-2" viewBox="0 0 200 100">
+      <ellipse cx="100" cy="60" rx="80" ry="30" fill="currentColor" />
+      <ellipse cx="60" cy="50" rx="50" ry="25" fill="currentColor" />
+      <ellipse cx="140" cy="45" rx="55" ry="28" fill="currentColor" />
+    </svg>
+    <svg class="cloud cloud-3" viewBox="0 0 200 100">
+      <ellipse cx="100" cy="60" rx="80" ry="30" fill="currentColor" />
+      <ellipse cx="60" cy="50" rx="50" ry="25" fill="currentColor" />
+      <ellipse cx="140" cy="45" rx="55" ry="28" fill="currentColor" />
+    </svg>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+   
+    <div class="header-text">
+      <h1>CatCloud</h1>
+      <p>Purrfect file storage</p>
+    </div>
+  </header>
+
+  <!-- Upload Section -->
+  <section class="upload-section">
+    <div
+      id="dropzone"
+      class="dropzone"
+      role="button"
+      tabindex="0"
+      aria-label="Upload files by clicking or dragging"
+    >
+      <!-- Animated Cat -->
+      <div id="catWrapper" class="cat-wrapper">
+        <svg id="catSvg" class="cat-svg" viewBox="0 0 200 180">
+          <!-- Tail -->
+          <g id="tail" class="tail-idle" style="transform-origin: 160px 120px">
+            <path d="M155 120 Q180 80 175 60 Q172 50 165 55 Q160 65 158 90 Q156 110 155 120"
+              fill="#f5a67b" stroke="#e8956a" stroke-width="1" />
+          </g>
+
+          <!-- Body -->
+          <ellipse cx="100" cy="135" rx="50" ry="35" fill="#fcd5b8" stroke="#f0c4a0" stroke-width="1" />
+
+          <!-- Left ear -->
+          <polygon points="60,50 45,10 80,40" fill="#fcd5b8" stroke="#f0c4a0" stroke-width="1" />
+          <polygon points="62,48 50,18 76,42" fill="#f5a67b" opacity="0.5" />
+
+          <!-- Right ear -->
+          <polygon points="140,50 155,10 120,40" fill="#fcd5b8" stroke="#f0c4a0" stroke-width="1" />
+          <polygon points="138,48 150,18 124,42" fill="#f5a67b" opacity="0.5" />
+
+          <!-- Head -->
+          <ellipse cx="100" cy="70" rx="42" ry="38" fill="#fcd5b8" stroke="#f0c4a0" stroke-width="1" />
+
+          <!-- Eyes -->
+          <g id="eyes">
+            <g id="eyeLeft">
+              <ellipse id="pupilLeft" cx="85" cy="65" rx="6" ry="7" fill="#4a3728" />
+              <ellipse id="shineLeft" cx="86.5" cy="63" rx="2.5" ry="2.5" fill="white" opacity="0.8" />
+            </g>
+            <g id="eyeRight">
+              <ellipse id="pupilRight" cx="115" cy="65" rx="6" ry="7" fill="#4a3728" />
+              <ellipse id="shineRight" cx="116.5" cy="63" rx="2.5" ry="2.5" fill="white" opacity="0.8" />
+            </g>
+          </g>
+
+          <!-- Happy eyes (hidden by default) -->
+          <g id="happyEyes" style="display: none">
+            <path d="M80,65 Q85,58 90,65" stroke="#4a3728" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <path d="M110,65 Q115,58 120,65" stroke="#4a3728" stroke-width="2.5" fill="none" stroke-linecap="round" />
+          </g>
+
+          <!-- Nose -->
+          <polygon points="100,75 96,80 104,80" fill="#f5a67b" />
+
+          <!-- Mouth -->
+          <path d="M96,80 Q100,86 104,80" stroke="#4a3728" stroke-width="1.2" fill="none" />
+          <path d="M100,80 L100,84" stroke="#4a3728" stroke-width="1.2" />
+
+          <!-- Whiskers -->
+          <line x1="70" y1="72" x2="50" y2="68" stroke="#d4a574" stroke-width="1" opacity="0.6" />
+          <line x1="70" y1="78" x2="48" y2="80" stroke="#d4a574" stroke-width="1" opacity="0.6" />
+          <line x1="130" y1="72" x2="150" y2="68" stroke="#d4a574" stroke-width="1" opacity="0.6" />
+          <line x1="130" y1="78" x2="152" y2="80" stroke="#d4a574" stroke-width="1" opacity="0.6" />
+
+          <!-- Cheeks -->
+          <ellipse cx="75" cy="78" rx="8" ry="5" fill="#f5a67b" opacity="0.3" />
+          <ellipse cx="125" cy="78" rx="8" ry="5" fill="#f5a67b" opacity="0.3" />
+
+          <!-- Paws (normal) -->
+          <g id="pawsNormal">
+            <ellipse cx="75" cy="160" rx="12" ry="7" fill="#fcd5b8" stroke="#f0c4a0" stroke-width="1" />
+            <ellipse cx="125" cy="160" rx="12" ry="7" fill="#fcd5b8" stroke="#f0c4a0" stroke-width="1" />
+          </g>
+
+          <!-- Paws (grabbing, hidden by default) -->
+          <g id="pawsGrab" style="display: none">
+            <ellipse cx="75" cy="152" rx="14" ry="8" fill="#fcd5b8" stroke="#f0c4a0" stroke-width="1" />
+            <ellipse cx="125" cy="152" rx="14" ry="8" fill="#fcd5b8" stroke="#f0c4a0" stroke-width="1" />
+            <circle cx="69" cy="147" r="3" fill="#f5a67b" opacity="0.5" />
+            <circle cx="75" cy="145" r="3" fill="#f5a67b" opacity="0.5" />
+            <circle cx="81" cy="147" r="3" fill="#f5a67b" opacity="0.5" />
+            <circle cx="119" cy="147" r="3" fill="#f5a67b" opacity="0.5" />
+            <circle cx="125" cy="145" r="3" fill="#f5a67b" opacity="0.5" />
+            <circle cx="131" cy="147" r="3" fill="#f5a67b" opacity="0.5" />
+          </g>
+
+          <!-- Chest fluff -->
+          <ellipse cx="100" cy="115" rx="18" ry="12" fill="#fff5eb" opacity="0.6" />
+        </svg>
+      </div>
+
+      <!-- Upload Text -->
+      <div class="dropzone-text">
+        <p id="dropMainText" class="main-text">Drop your files here</p>
+        <p id="dropSubText" class="sub-text">or click to browse your computer</p>
+        <p id="dropDragText" class="drag-text" style="display: none">Drop it here! I will catch it!</p>
+      </div>
+
+      <!-- Cloud Upload Icon -->
+      <svg class="cloud-upload-icon" viewBox="0 0 64 44">
+        <path d="M52 28c6.627 0 12-5.373 12-12S58.627 4 52 4c-1.637 0-3.197.328-4.618.921C44.872 2.074 41.15 0 36.91 0 30.462 0 25.14 4.825 24.236 10.993 23.51 10.682 22.724 10.5 21.91 10.5c-3.308 0-5.99 2.682-5.99 5.99 0 .222.012.442.036.658A9.49 9.49 0 0 0 8 26.5C8 31.747 12.253 36 17.5 36h34c.17 0 .34-.003.5-.01"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+        <path d="M32 24v14M26 30l6-6 6 6"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+
+      <input id="fileInput" type="file" class="file-input" aria-hidden="true" tabindex="-1" />
+    </div>
+  </section>
+
+  <!-- File List -->
+  <section id="fileSection" class="file-section" style="display: none">
+    <div class="file-section-header">
+      <h2>Your Files <span id="fileCount" class="file-count">(0)</span></h2>
+    </div>
+    <div id="fileList" class="file-list"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Made with whiskers and love</p>
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // ── State ──
+      var files = [];
+      var catState = "idle"; // idle | watching | grabbing | happy
+      var dragCounter = 0;
+
+      // ── DOM References ──
+      var dropzone = document.getElementById("dropzone");
+      var fileInput = document.getElementById("fileInput");
+      var catWrapper = document.getElementById("catWrapper");
+      var tail = document.getElementById("tail");
+      var eyes = document.getElementById("eyes");
+      var happyEyes = document.getElementById("happyEyes");
+      var pawsNormal = document.getElementById("pawsNormal");
+      var pawsGrab = document.getElementById("pawsGrab");
+      var pupilLeft = document.getElementById("pupilLeft");
+      var shineLeft = document.getElementById("shineLeft");
+      var pupilRight = document.getElementById("pupilRight");
+      var shineRight = document.getElementById("shineRight");
+      var dropMainText = document.getElementById("dropMainText");
+      var dropSubText = document.getElementById("dropSubText");
+      var dropDragText = document.getElementById("dropDragText");
+      var fileSection = document.getElementById("fileSection");
+      var fileList = document.getElementById("fileList");
+      var fileCount = document.getElementById("fileCount");
+
+      // ── API Configuration ──
+      var UPLOAD_URL = "/catpics";
+      var LIST_URL = "/catpics";
+
+      // ── Utility ──
+      function generateId() {
+        return "f_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 8);
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return "0 Bytes";
+        var k = 1024;
+        var sizes = ["Bytes", "KB", "MB", "GB"];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      }
+
+      function getFileIcon(type) {
+        if (!type) return "doc";
+        if (type.startsWith("image/")) return "img";
+        if (type.startsWith("video/")) return "vid";
+        if (type.startsWith("audio/")) return "aud";
+        if (type.indexOf("pdf") !== -1) return "pdf";
+        if (type.indexOf("zip") !== -1 || type.indexOf("rar") !== -1) return "zip";
+        return "doc";
+      }
+
+      // ── Cat State Machine ──
+      function setCatState(newState) {
+        catState = newState;
+
+        // Reset classes
+        catWrapper.classList.remove("bouncing", "reaching");
+
+        // Eyes
+        if (newState === "happy") {
+          eyes.style.display = "none";
+          happyEyes.style.display = "";
+        } else {
+          eyes.style.display = "";
+          happyEyes.style.display = "none";
+        }
+
+        // Tail
+        tail.classList.remove("tail-idle", "tail-wag");
+        tail.classList.add(newState === "happy" ? "tail-wag" : "tail-idle");
+
+        // Paws
+        if (newState === "grabbing") {
+          pawsNormal.style.display = "none";
+          pawsGrab.style.display = "";
+        } else {
+          pawsNormal.style.display = "";
+          pawsGrab.style.display = "none";
+        }
+
+        // Body animation
+        if (newState === "bouncing" || newState === "happy") {
+          catWrapper.classList.add("bouncing");
+        } else if (newState === "grabbing") {
+          catWrapper.classList.add("reaching");
+        }
+
+        // Reset pupils when idle
+        if (newState === "idle") {
+          pupilLeft.setAttribute("cx", "85");
+          pupilLeft.setAttribute("cy", "65");
+          shineLeft.setAttribute("cx", "86.5");
+          shineLeft.setAttribute("cy", "63");
+          pupilRight.setAttribute("cx", "115");
+          pupilRight.setAttribute("cy", "65");
+          shineRight.setAttribute("cx", "116.5");
+          shineRight.setAttribute("cy", "63");
+        }
+      }
+
+      function updateEyeTracking(clientX, clientY) {
+        if (catState !== "watching") return;
+
+        var rect = dropzone.getBoundingClientRect();
+        var catCenterX = rect.left + rect.width / 2;
+        var catCenterY = rect.top + 80;
+        var dx = clientX - catCenterX;
+        var dy = clientY - catCenterY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var maxOffset = 4;
+
+        var ox = dist > 0 ? (dx / dist) * maxOffset : 0;
+        var oy = dist > 0 ? (dy / dist) * maxOffset : 0;
+
+        pupilLeft.setAttribute("cx", String(85 + ox));
+        pupilLeft.setAttribute("cy", String(65 + oy));
+        shineLeft.setAttribute("cx", String(86.5 + ox * 0.5));
+        shineLeft.setAttribute("cy", String(63 + oy * 0.5));
+        pupilRight.setAttribute("cx", String(115 + ox));
+        pupilRight.setAttribute("cy", String(65 + oy));
+        shineRight.setAttribute("cx", String(116.5 + ox * 0.5));
+        shineRight.setAttribute("cy", String(63 + oy * 0.5));
+      }
+
+      // ── Upload Text ──
+      function showDragText(show) {
+        if (show) {
+          dropMainText.style.display = "none";
+          dropSubText.style.display = "none";
+          dropDragText.style.display = "";
+        } else {
+          dropMainText.style.display = "";
+          dropSubText.style.display = "";
+          dropDragText.style.display = "none";
+        }
+      }
+
+      // ── File Handling ──
+      function uploadFilesToServer(fileListInput) {
+        setCatState("grabbing");
+        
+        var formData = new FormData();
+        for (var i = 0; i < fileListInput.length; i++) {
+          formData.append("file", fileListInput[i]);
+        }
+
+        fetch(UPLOAD_URL, {
+          method: "POST",
+          body: formData,
+          cache: "no-store"
+        })
+        .then(function(response) {
+          if (response.status >= 200 && response.status < 400) {
+            return response.text();
+          }
+          throw new Error("Upload failed with status: " + response.status);
+        })
+        .then(function() {
+          setCatState("happy");
+          setTimeout(function() {
+            loadFilesFromServer();
+            setCatState("idle");
+          }, 1000);
+        })
+        .catch(function(error) {
+          console.error("Upload error:", error);
+          setCatState("idle");
+          alert("Upload failed. Please try again.");
+        });
+      }
+
+      function loadFilesFromServer() {
+        fetch(LIST_URL, {
+          method: "GET",
+          cache: "no-store"
+        })
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error("Failed to load files");
+          }
+          return response.text();
+        })
+        .then(function(html) {
+          parseFileListFromHTML(html);
+        })
+        .catch(function(error) {
+          console.error("Load error:", error);
+        });
+      }
+
+      function parseFileListFromHTML(html) {
+        files = [];
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, "text/html");
+        var links = doc.querySelectorAll("a");
+        
+        links.forEach(function(link) {
+          var href = link.getAttribute("href");
+          var text = link.textContent.trim();
+          
+          // Skip parent directory links, empty links, and directories (ending with /)
+          if (!href || href === ".." || href === "/" || text === "../" || text === "" || href.endsWith("/")) {
+            return;
+          }
+          
+          // Extract filename from href - handle both absolute and relative paths
+          var filename = decodeURIComponent(href.split("/").pop());
+          
+          // Skip if no filename or if it's a directory indicator
+          if (!filename || filename === "" || filename === "." || filename === "..") {
+            return;
+          }
+          
+          // Create unique ID based on filename
+          var fileId = "file_" + filename.replace(/[^a-zA-Z0-9]/g, "_");
+          
+          files.push({
+            id: fileId,
+            name: filename,
+            size: 0, // Size not available from directory listing
+            type: getMimeTypeFromFilename(filename),
+            serverPath: href
+          });
+        });
+        
+        renderFileList();
+      }
+
+      function getMimeTypeFromFilename(filename) {
+        var ext = filename.split(".").pop().toLowerCase();
+        var mimeTypes = {
+          "jpg": "image/jpeg",
+          "jpeg": "image/jpeg",
+          "png": "image/png",
+          "gif": "image/gif",
+          "webp": "image/webp",
+          "pdf": "application/pdf",
+          "zip": "application/zip",
+          "mp4": "video/mp4",
+          "mp3": "audio/mpeg"
+        };
+        return mimeTypes[ext] || "application/octet-stream";
+      }
+
+      function handleFiles(fileListInput) {
+        uploadFilesToServer(fileListInput);
+      }
+
+      function downloadFile(filename) {
+        var link = document.createElement("a");
+        link.href = LIST_URL + "/" + encodeURIComponent(filename);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      function deleteFile(filename) {
+        var card = document.getElementById("card-" + filename.replace(/[^a-zA-Z0-9]/g, "_"));
+        if (card) {
+          card.classList.add("removing");
+        }
+        
+        fetch(LIST_URL + "/" + encodeURIComponent(filename), {
+          method: "DELETE"
+        })
+        .then(function(response) {
+          setTimeout(function() {
+            loadFilesFromServer();
+          }, 400);
+        })
+        .catch(function(error) {
+          console.error("Delete error:", error);
+          if (card) {
+            card.classList.remove("removing");
+          }
+          alert("Delete failed. Please try again.");
+        });
+      }
+
+      // ── Render File List ──
+      function renderFileList() {
+        if (files.length === 0) {
+          fileSection.style.display = "none";
+          fileList.innerHTML = "";
+          return;
+        }
+
+        fileSection.style.display = "";
+        fileCount.textContent = "(" + files.length + ")";
+        fileList.innerHTML = "";
+
+        files.forEach(function (file, index) {
+          var card = document.createElement("div");
+          card.className = "file-card";
+          card.id = "card-" + file.id;
+          card.style.animationDelay = (index * 60) + "ms";
+
+          var icon = document.createElement("div");
+          icon.className = "file-icon";
+          icon.textContent = getFileIcon(file.type);
+
+          var info = document.createElement("div");
+          info.className = "file-info";
+
+          var name = document.createElement("div");
+          name.className = "file-name";
+          name.textContent = file.name;
+
+          var size = document.createElement("div");
+          size.className = "file-size";
+          size.textContent = formatFileSize(file.size);
+
+          info.appendChild(name);
+          info.appendChild(size);
+
+          // Actions wrapper
+          var actions = document.createElement("div");
+          actions.className = "file-actions";
+
+          // Cat Fish Download Button (cat carrying a fish = fetching/downloading)
+          var dlBtn = document.createElement("button");
+          dlBtn.className = "download-btn";
+          dlBtn.setAttribute("aria-label", "Download file " + file.name);
+          dlBtn.setAttribute("title", "Download file");
+          dlBtn.innerHTML =
+            '<svg class="download-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+              /* Fish body */
+              '<ellipse cx="32" cy="24" rx="16" ry="9" fill="currentColor" opacity="0.85"/>' +
+              /* Fish tail */
+              '<path d="M48 24 L58 16 L56 24 L58 32 Z" fill="currentColor" opacity="0.7"/>' +
+              /* Fish eye */
+              '<circle cx="22" cy="22" r="2.5" fill="white" opacity="0.9"/>' +
+              '<circle cx="21.5" cy="21.5" r="1" fill="#3d2e22"/>' +
+              /* Fish fin line */
+              '<path d="M30 18 Q33 14 36 18" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>' +
+              /* Down arrow below fish */
+              '<path d="M32 38 L32 54" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>' +
+              '<path d="M24 47 L32 55 L40 47" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</svg>';
+
+          (function (fileName) {
+            dlBtn.addEventListener("click", function (e) {
+              e.stopPropagation();
+              downloadFile(fileName);
+            });
+          })(file.name);
+
+          // Cat Paw Delete Button
+          var btn = document.createElement("button");
+          btn.className = "paw-btn";
+          btn.setAttribute("aria-label", "Delete file " + file.name);
+          btn.setAttribute("title", "Delete file");
+          btn.innerHTML =
+            '<svg class="paw-icon" viewBox="0 0 64 64" fill="currentColor">' +
+              '<ellipse cx="32" cy="42" rx="12" ry="10" opacity="0.9" />' +
+              '<ellipse cx="20" cy="28" rx="6" ry="7" opacity="0.85" />' +
+              '<ellipse cx="32" cy="24" rx="6" ry="7" opacity="0.85" />' +
+              '<ellipse cx="44" cy="28" rx="6" ry="7" opacity="0.85" />' +
+              '<ellipse cx="48" cy="40" rx="5" ry="6" transform="rotate(20 48 40)" opacity="0.8" />' +
+              '<ellipse cx="16" cy="40" rx="5" ry="6" transform="rotate(-20 16 40)" opacity="0.8" />' +
+            '</svg>';
+
+          (function (fileName) {
+            btn.addEventListener("click", function (e) {
+              e.stopPropagation();
+              deleteFile(fileName);
+            });
+          })(file.name);
+
+          actions.appendChild(dlBtn);
+          actions.appendChild(btn);
+
+          card.appendChild(icon);
+          card.appendChild(info);
+          card.appendChild(actions);
+          fileList.appendChild(card);
+        });
+      }
+
+      // ── Drag & Drop Events ──
+      dropzone.addEventListener("dragenter", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter++;
+        dropzone.classList.add("dragover");
+        setCatState("watching");
+        showDragText(true);
+      });
+
+      dropzone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        updateEyeTracking(e.clientX, e.clientY);
+      });
+
+      dropzone.addEventListener("dragleave", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter--;
+        if (dragCounter <= 0) {
+          dragCounter = 0;
+          dropzone.classList.remove("dragover");
+          setCatState("idle");
+          showDragText(false);
+        }
+      });
+
+      dropzone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter = 0;
+        dropzone.classList.remove("dragover");
+        showDragText(false);
+
+        if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+          handleFiles(e.dataTransfer.files);
+        }
+      });
+
+      // ── Click / Keyboard ──
+      dropzone.addEventListener("click", function () {
+        fileInput.click();
+      });
+
+      dropzone.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          fileInput.click();
+        }
+      });
+
+      fileInput.addEventListener("change", function () {
+        if (fileInput.files && fileInput.files.length > 0) {
+          handleFiles(fileInput.files);
+          fileInput.value = "";
+        }
+      });
+
+      // ── Init ──
+      setCatState("idle");
+      loadFilesFromServer();
+    })();
+  </script>
+</body>
+</html>

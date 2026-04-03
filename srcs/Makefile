@@ -30,7 +30,7 @@ nginx-logs:
 	$(COMPOSE) logs -f nginx_in
 
 up:
-	$(COMPOSE) up -d
+	$(COMPOSE) up --build -d
 down:
 	$(COMPOSE) down -v
 logs:

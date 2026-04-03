@@ -12,7 +12,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mariadb-install-db --user=mysql --datadir=/var/lib/mysql
 
 # initial server startup + prevent connection while initializing,[& runs in background] [$! = PID of MariaDB server]
-    mariadbd --socket=/var/lib/mysql/mysql.sock --user=mysql &
+    mariadbd --skip-networking --user=mysql &
     pid="$!"
 
 # Wait until server is ready ([until = while !] 0=server ready, non-zero=not ready)
@@ -27,7 +27,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 
 #sending SQL commands to mysql client (mysql = mariadb command line client, -u root -> connect as root)
 # --socket=/var/lib/mysql/mysql.sock
-    mysql --socket=/var/lib/mysql/mysql.sock -u root << EOF
+    mysql -u root << EOF
 CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
 GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';
@@ -37,7 +37,8 @@ EOF
 
     kill "$pid"
     wait "$pid"
-fi
 
     chown -R mysql:mysql /var/lib/mysql
+fi
+
     exec "$@" --user=mysql --datadir=/var/lib/mysql
