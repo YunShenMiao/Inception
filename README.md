@@ -44,9 +44,7 @@ network ‘Inception’ so containers can reach each other internally while only
 
 **Docker Volumes vs Bind Mounts**
 Bind mounts link a host path directly into the container — useful for development but
-tightly coupled to the host filesystem layout. Named volumes are managed by Docker,
-portable, and survive container recreation. The WordPress files and database are stored in
-named volumes under `/home/youruser/data/` on the host, as required by the subject.
+tightly coupled to the host filesystem layout. Named volumes are managed by Docker. The WordPress files and database are stored in named volumes under `/home/youruser/data/` on the host, as required by the subject.
 
 ---
 
@@ -68,12 +66,11 @@ cd Inception
 
 Create your secrets (never commit these):
 
-```bash
 mkdir -p secrets
-echo "your_db_password" > secrets/db_password.txt
-echo "your_db_root_password" > secrets/db_root_password.txt
-echo "your_wp_admin_password" > secrets/credentials.txt
-```
+echo "your_db_password" > mysql_pw
+echo "your_db_root_password" > secrets/mysql_root_pw
+echo "your_wp_admin_password" > secrets/wp_admin_pw
+echo "your_wp_user_password" > secrets/wp_user_pw
 
 Fill in `srcs/.env` with your domain and usernames (no passwords in this file). For example:
 
