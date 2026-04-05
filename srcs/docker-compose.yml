@@ -59,13 +59,18 @@ services:
       - inception
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "9090:9090"
       - "9110:9110"
+  static_in:
+    build: ./requirements/bonus/static
+    image: static_in
+    container_name: static_in
+    networks:
+     - inception
+    restart: unless-stopped
 
 networks:
   inception:
-    driver: bridge
-  # if not defined creates default network
 
 secrets:
   db_password:
@@ -76,7 +81,6 @@ secrets:
     file: ../secrets/wp_admin_pw
   wp_user_password:
     file: ../secrets/wp_user_pw
-
 
 volumes:
   db_data:

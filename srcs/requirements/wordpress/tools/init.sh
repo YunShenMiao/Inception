@@ -32,7 +32,6 @@ EOF
     echo "$SALTS" >> wp-config.php
 
     cat <<'EOF' >> wp-config.php
-
 $table_prefix = 'wp_';
 define( 'WP_DEBUG', false );
 if ( !defined('ABSPATH') )

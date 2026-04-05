@@ -6,7 +6,7 @@
 #	docker compose -f srcs/docker-compose.yml up --build
 
 
-COMPOSE=docker compose
+COMPOSE=docker compose -f srcs/docker-compose.yml
 
 db-up:
 	$(COMPOSE) up --build -d mariadb_in
